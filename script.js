@@ -153,3 +153,39 @@ modal?.addEventListener("click", (e) => {
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
 });
+/* =================================================
+   Scroll Reveal (IntersectionObserver)
+   ================================================= */
+(() => {
+  const targets = document.querySelectorAll(
+    ".hero, .section, .footer, .section__head, .about__card, .skillCard, .projectCard, .vision__card, .pill, .quote"
+  );
+
+  // 자동으로 reveal 클래스 부여
+  targets.forEach(el => el.classList.add("reveal"));
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+
+        const el = entry.target;
+
+        // data-delay="120" 이런 식으로 지연 가능
+        const delay = el.dataset.delay ? Number(el.dataset.delay) : 0;
+        if (delay) el.style.transitionDelay = `${delay}ms`;
+
+        el.classList.add("reveal--soft");
+        requestAnimationFrame(() => el.classList.add("is-visible"));
+
+        observer.unobserve(el); // 한 번만 실행
+      });
+    },
+    {
+      threshold: 0.15,
+      rootMargin: "0px 0px -10% 0px"
+    }
+  );
+
+  targets.forEach(el => observer.observe(el));
+})();
