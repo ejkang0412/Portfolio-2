@@ -1,4 +1,16 @@
-// ===== Mobile Nav =====
+// ==============================
+// 0) Helpers
+// ==============================
+const snap = document.getElementById("snap"); // <main class="snap" id="snap">
+
+function lockSnapScroll(lock) {
+  if (!snap) return;
+  snap.style.overflowY = lock ? "hidden" : "auto";
+}
+
+// ==============================
+// 1) Mobile Nav
+// ==============================
 const navToggle = document.getElementById("navToggle");
 const navMobile = document.getElementById("navMobile");
 
@@ -8,7 +20,7 @@ navToggle?.addEventListener("click", () => {
   navMobile.hidden = isOpen;
 });
 
-// 모바일 메뉴 클릭 시 닫기
+// 모바일 메뉴 클릭 시 닫기 + 스냅 스크롤로 이동
 navMobile?.querySelectorAll("a").forEach(a => {
   a.addEventListener("click", () => {
     navToggle.setAttribute("aria-expanded", "false");
@@ -16,10 +28,59 @@ navMobile?.querySelectorAll("a").forEach(a => {
   });
 });
 
-// ===== Footer Year =====
-document.getElementById("year").textContent = String(new Date().getFullYear());
 
-// ===== Project Modal Data =====
+// ==============================
+// 2) Footer Year
+// ==============================
+const yearEl = document.getElementById("year");
+if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+
+// ==============================
+// 3) Snap Nav Scroll (IMPORTANT)
+// - body는 overflow:hidden 이라 window가 아니라 snap이 스크롤됨
+// - nav의 #about 같은 앵커 클릭을 snap 스크롤로 변환
+// ==============================
+function scrollToHash(hash) {
+  if (!snap) return;
+
+  if (!hash || hash === "#top" || hash === "#home") {
+    snap.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  const target = document.querySelector(hash);
+  if (!target) return;
+
+  const top = target.offsetTop; // snap 내부 flow 기준
+  snap.scrollTo({ top, behavior: "smooth" });
+}
+
+function interceptAnchorClicks(root = document) {
+  root.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener("click", (e) => {
+      const href = a.getAttribute("href");
+      if (!href) return;
+
+      // 기본 앵커 이동 막고 snap 스크롤로 이동
+      e.preventDefault();
+      history.replaceState(null, "", href);
+      scrollToHash(href);
+    });
+  });
+}
+
+interceptAnchorClicks(); // top nav + footer + mobile 포함
+
+// 새로고침/첫 진입 시 URL 해시가 있으면 해당 챕터로
+window.addEventListener("load", () => {
+  if (location.hash) scrollToHash(location.hash);
+});
+
+
+// ==============================
+// 4) Project Modal Data
+// ==============================
 const PROJECTS = {
   p1: {
     title: "전략적 다이렉트 소싱 참여 #01",
@@ -87,14 +148,17 @@ const PROJECTS = {
   }
 };
 
-// ===== Modal Logic =====
+
+// ==============================
+// 5) Modal Logic (snap 구조에 맞춰 잠금)
+// ==============================
 const modal = document.getElementById("modal");
 const modalContent = document.getElementById("modalContent");
 const modalClose = document.getElementById("modalClose");
 
 function openModal(projectKey){
   const p = PROJECTS[projectKey];
-  if (!p) return;
+  if (!p || !modal || !modalContent) return;
 
   modalContent.innerHTML = `
     <div class="detail">
@@ -128,13 +192,17 @@ function openModal(projectKey){
 
   modal.classList.add("is-open");
   modal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
+
+  // ✅ body가 아니라 snap만 잠금
+  lockSnapScroll(true);
 }
 
 function closeModal(){
+  if (!modal) return;
   modal.classList.remove("is-open");
   modal.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
+
+  lockSnapScroll(false);
 }
 
 document.querySelectorAll(".projectCard").forEach(btn => {
@@ -151,17 +219,19 @@ modal?.addEventListener("click", (e) => {
 
 // ESC 닫기
 window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+  if (e.key === "Escape" && modal?.classList.contains("is-open")) closeModal();
 });
-/* =================================================
-   Scroll Reveal (IntersectionObserver)
-   ================================================= */
+
+
+// ==============================
+// 6) Scroll Reveal (IntersectionObserver)
+// - root를 snap으로 지정해야 "샤라라"가 제대로 됨
+// ==============================
 (() => {
   const targets = document.querySelectorAll(
-    ".hero, .section, .footer, .section__head, .about__card, .skillCard, .projectCard, .vision__card, .pill, .quote"
+    ".hero .container, .section .container, .footer .container, .section__head, .about__card, .skillCard, .projectCard, .vision__card, .pill, .quote"
   );
 
-  // 자동으로 reveal 클래스 부여
   targets.forEach(el => el.classList.add("reveal"));
 
   const observer = new IntersectionObserver(
@@ -170,18 +240,17 @@ window.addEventListener("keydown", (e) => {
         if (!entry.isIntersecting) return;
 
         const el = entry.target;
-
-        // data-delay="120" 이런 식으로 지연 가능
         const delay = el.dataset.delay ? Number(el.dataset.delay) : 0;
         if (delay) el.style.transitionDelay = `${delay}ms`;
 
         el.classList.add("reveal--soft");
         requestAnimationFrame(() => el.classList.add("is-visible"));
 
-        observer.unobserve(el); // 한 번만 실행
+        observer.unobserve(el);
       });
     },
     {
+      root: snap || null,          // ✅ 핵심
       threshold: 0.15,
       rootMargin: "0px 0px -10% 0px"
     }
