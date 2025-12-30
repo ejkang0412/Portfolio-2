@@ -708,3 +708,8 @@ body{
 .projectCard__body p {
   color: #ffffff;
 }
+/* 프로젝트 카드 썸네일 아래 텍스트 흰색 처리 */
+.projectCard__body h3,
+.projectCard__body p {
+  color: #ffffff !important;
+}
