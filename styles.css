@@ -700,3 +700,11 @@ body{
     width: min(320px, 80vw);
   }
 }
+/* Key Projects 카드 제목/설명 글씨 색상 수정 */
+.projectCard__body h3 {
+  color: #ffffff;
+}
+
+.projectCard__body p {
+  color: #ffffff;
+}
