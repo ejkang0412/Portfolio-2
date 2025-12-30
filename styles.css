@@ -590,3 +590,40 @@ button { font: inherit; }
     max-width: 1100px;
   }
 }
+/* =================================================
+   Scroll Reveal (Framer-like animation)
+   ================================================= */
+
+/* 기본 상태: 안 보이게 */
+.reveal{
+  opacity: 0;
+  transform: translateY(20px);
+  filter: blur(2px);
+  transition:
+    opacity 700ms ease,
+    transform 700ms cubic-bezier(.2,.8,.2,1),
+    filter 700ms ease;
+  will-change: opacity, transform, filter;
+}
+
+/* 보이는 상태 */
+.reveal.is-visible{
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* 살짝 더 부드러운 버전 */
+.reveal--soft{
+  transform: translateY(14px);
+}
+
+/* 모션 최소화 환경 대응 */
+@media (prefers-reduced-motion: reduce){
+  .reveal, .reveal.is-visible{
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+}
