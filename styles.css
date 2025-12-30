@@ -498,3 +498,34 @@ button { font: inherit; }
   .nav__toggle{ display:block; }
   .grid2{ grid-template-columns: 1fr; }
 }
+/* ===== FHD Desktop tuning (1920x1080) ===== */
+@media (min-width: 1200px){
+  .hero{
+    min-height: 68vh;
+    padding: 52px 0 40px;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero__bg{
+    top: -120px;
+    left: -100px;
+    right: -100px;
+    height: 380px;
+  }
+
+  .hero__title{
+    font-size: 42px;
+    line-height: 1.15;
+    max-width: 880px;
+  }
+
+  .hero__meta{
+    margin-top: 14px;
+  }
+
+  .section{
+    padding: 64px 0;
+  }
+}
+
