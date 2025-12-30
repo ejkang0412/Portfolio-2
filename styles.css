@@ -1,4 +1,3 @@
-
 /* ====== Base ====== */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -23,6 +22,10 @@ button { font: inherit; }
   --shadow: 0 12px 30px rgba(0,0,0,.35);
   --radius: 18px;
   --radius2: 22px;
+
+  /* ✅ 챕터 스냅용 */
+  --topbar-h: 56px; /* 필요하면 60/64로 미세조정 */
+  --chapter-h: calc(100vh - var(--topbar-h));
 }
 
 .container{
@@ -33,18 +36,13 @@ button { font: inherit; }
 .section{ padding: 86px 0; }
 .section--muted{ background: #0f0f0f; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 
-.section__head{
-  margin-bottom: 28px;
-}
+.section__head{ margin-bottom: 28px; }
 .section__head h2{
   margin: 0 0 10px;
   font-size: 34px;
   letter-spacing: -0.02em;
 }
-.section__head p{
-  margin: 0;
-  color: var(--muted);
-}
+.section__head p{ margin: 0; color: var(--muted); }
 
 /* ====== Topbar ====== */
 .topbar{
@@ -109,36 +107,60 @@ button { font: inherit; }
 }
 .nav__mobile a:hover{ color: var(--text); }
 
-/* ====== Hero ====== */
-.hero{
-  position: relative;
-  padding: 56px 0 44px;  /* 84/60 -> 축소 */
-  overflow: hidden;
 
-  /* 100%에서 과하게 길어지는 느낌 방지 */
-  min-height: 72vh;
+/* =================================================
+   ✅ FULLPAGE CHAPTER SNAP (PC용)
+   - 스크롤은 main.snap에서만
+   - 한 챕터 = 한 화면(상단바 제외)
+================================================= */
+html, body { height: 100%; }
+body { overflow: hidden; } /* ✅ body 스크롤 막고 snap에서만 스크롤 */
+
+.snap{
+  height: var(--chapter-h);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.chapter{
+  min-height: var(--chapter-h);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+
   display: flex;
   align-items: center;
 }
 
-.hero__inner{ position: relative; z-index: 1; }
+.chapter.section{ padding: 0 !important; }
+.chapter.footer{ padding: 0 !important; }
 
+/* 각 챕터 내부 여백은 container로 */
+.chapter .container{ padding: 56px 0 44px; }
+
+/* muted 섹션 경계선 약하게 */
+.section--muted{
+  border-top: 1px solid rgba(255,255,255,.04);
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+
+
+/* ====== Hero ====== */
+.hero{
+  position: relative;
+  overflow: hidden;
+}
+.hero__inner{ position: relative; z-index: 1; }
 .hero__bg{
   position: absolute;
-
-  /* inset:-200px 로 과하게 퍼지던 배경 범위 줄이기 */
-  left: -120px;
-  right: -120px;
-  top: -140px;
-
-  /* 520px -> 420px : 아래로 번지는 느낌 감소 */
-  height: 420px;
-
-  background:
-    radial-gradient(circle at 20% 30%, rgba(255,215,0,.16), transparent 52%),
-    radial-gradient(circle at 70% 40%, rgba(78,205,196,.10), transparent 60%),
-    radial-gradient(circle at 50% 90%, rgba(255,255,255,.05), transparent 62%);
+  inset: 0;
   pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255,215,0,.18), transparent 55%),
+    radial-gradient(circle at 75% 25%, rgba(78,205,196,.10), transparent 62%),
+    radial-gradient(circle at 50% 60%, rgba(255,255,255,.06), transparent 68%),
+    linear-gradient(to bottom, rgba(18,18,18,0) 0%, rgba(18,18,18,1) 92%);
 }
 
 .eyebrow{
@@ -153,32 +175,59 @@ button { font: inherit; }
   text-transform: uppercase;
   margin: 0 0 14px;
 }
-
 .hero__title{
   margin: 0 0 16px;
-
-  /* 100%에서 줄바꿈이 많아져서 커 보이는 현상 완화 */
-  font-size: clamp(26px, 3.1vw, 44px); /* 28/3.6/48 -> 26/3.1/44 */
+  font-size: clamp(26px, 3.1vw, 44px);
   line-height: 1.16;
   letter-spacing: -0.03em;
 }
-
 .accent{ color: var(--accent); }
 .nowrap{ white-space: nowrap; }
 
 .hero__desc{
-  margin: 0 0 22px; /* 24 -> 22 */
+  margin: 0 0 22px;
   color: var(--muted);
   font-size: 16px;
   max-width: 720px;
 }
 .hero__cta{ display:flex; gap: 12px; flex-wrap: wrap; }
 
+.btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 800;
+  border: 1px solid rgba(255,255,255,.12);
+  cursor: pointer;
+}
+.btn--primary{
+  background: var(--accent);
+  color: #121212;
+  border-color: rgba(255,215,0,.55);
+}
+.btn--primary:hover{ filter: brightness(1.03); }
+.btn--ghost{
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+}
+.btn--ghost:hover{ background: rgba(255,255,255,.08); }
+
 .hero__meta{
-  margin-top: 14px; /* 18 -> 14 */
+  margin-top: 14px;
   display:flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+.meta__chip{
+  font-size: 13px;
+  color: var(--muted);
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.03);
 }
 
 
@@ -243,12 +292,12 @@ button { font: inherit; }
 }
 .bullets{ margin: 0; padding-left: 18px; color: var(--muted); }
 .bullets li{ margin: 6px 0; }
-
 .about__desc{
   margin: 10px 0 0;
   color: #d9d9d9;
   line-height: 1.75;
 }
+
 
 /* ====== Skills ====== */
 .skills{
@@ -287,6 +336,7 @@ button { font: inherit; }
   border-radius: 999px;
 }
 .pct{ color: var(--muted); text-align:right; }
+
 
 /* ====== Projects ====== */
 .projectGrid{
@@ -337,11 +387,9 @@ button { font: inherit; }
 .projectCard__body p{ margin: 0 0 12px; color: var(--muted); line-height: 1.65; }
 .link{ color: var(--accent); font-weight: 800; }
 
+
 /* ====== Vision ====== */
-.vision{
-  display:grid;
-  gap: 14px;
-}
+.vision{ display:grid; gap: 14px; }
 .vision__card{
   background: var(--panel);
   border: 1px solid rgba(255,255,255,.10);
@@ -374,9 +422,9 @@ button { font: inherit; }
 }
 .quote p{ margin:0; color:#f0f0f0; line-height: 1.75; }
 
+
 /* ====== Footer ====== */
 .footer{
-  padding: 56px 0 40px;
   border-top: 1px solid rgba(255,255,255,.06);
   background: #0d0d0d;
 }
@@ -392,6 +440,7 @@ button { font: inherit; }
   font-size: 13px;
 }
 .dot{ opacity: .6; }
+
 
 /* ====== Modal ====== */
 .modal{
@@ -486,144 +535,34 @@ button { font: inherit; }
   line-height: 1.75;
 }
 
+
 /* ====== Responsive ====== */
 @media (max-width: 980px){
+  /* 모바일에서는 기존처럼 자연 스크롤이 더 나음 */
+  body{ overflow: auto; }
+  .snap{ height: auto; overflow: visible; scroll-snap-type: none; }
+  .chapter{ min-height: auto; display: block; }
+  .chapter.section{ padding: 86px 0 !important; }
+  .chapter.footer{ padding: 56px 0 40px !important; }
+  .chapter .container{ padding: 0; }
+
   .projectGrid{ grid-template-columns: 1fr; }
   .about__card{ grid-template-columns: 1fr; }
   .detail__head, .detail__body{ grid-template-columns: 1fr; }
   .skills{ grid-template-columns: 1fr; }
 }
+
 @media (max-width: 860px){
   .nav{ display:none; }
   .nav__toggle{ display:block; }
   .grid2{ grid-template-columns: 1fr; }
 }
+
 /* ===== FHD Desktop tuning (1920x1080) ===== */
 @media (min-width: 1200px){
-  .hero{
-    min-height: 68vh;
-    padding: 52px 0 40px;
-    display: flex;
-    align-items: center;
-  }
-
-  .hero__bg{
-    top: -120px;
-    left: -100px;
-    right: -100px;
-    height: 380px;
-  }
-
   .hero__title{
     font-size: 42px;
     line-height: 1.15;
-    max-width: 880px;
-  }
-
-  .hero__meta{
-    margin-top: 14px;
-  }
-
-  .section{
-    padding: 64px 0;
-  }
-}
-/* ================================
-   FIX: FHD(1920x1080) 100% 기준
-   - 첫 화면에 About 안 보이게
-   - 그라데이션 끊김 제거
-================================ */
-
-/* Hero를 상단바 제외한 화면 높이만큼 채움 */
-.hero{
-  position: relative;
-  overflow: hidden;
-
-  min-height: calc(100vh - var(--topbar-h));
-  padding: 0;
-
-  display: flex;
-  align-items: center;
-}
-
-/* 기존 hero padding은 inner로 이동 */
-.hero__inner{
-  position: relative;
-  z-index: 1;
-  padding: 56px 0 44px;
-}
-
-/* 그라데이션이 hero 전체를 덮도록 변경(끊김 해결) */
-.hero__bg{
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-
-  background:
-    radial-gradient(circle at 18% 20%, rgba(255,215,0,.18), transparent 55%),
-    radial-gradient(circle at 75% 25%, rgba(78,205,196,.10), transparent 62%),
-    radial-gradient(circle at 50% 60%, rgba(255,255,255,.06), transparent 68%),
-    linear-gradient(to bottom, rgba(18,18,18,0) 0%, rgba(18,18,18,1) 92%);
-}
-
-/* FHD에서 제목만 안정적으로(줄바꿈/크기) */
-@media (min-width: 1200px){
-  .hero__title{
-    font-size: 42px;
-    line-height: 1.15;
-    max-width: 880px;
-  }
-
-/* =========================
-   HERO: FHD(1920)에서 좌우 여백 줄이기
-   - 전체 섹션 컨테이너(1120px)는 유지
-   - HERO만 넓게(1440px) 사용
-========================= */
-@media (min-width: 1200px){
-  .hero .container{
-    width: min(1440px, calc(100% - 120px)); /* 좌우 여백 60px */
-    margin: 0 auto;
-  }
-
-  /* 타이틀 줄바꿈도 안정적으로 */
-  .hero__title{
-    max-width: 1100px;
-  }
-}
-/* =================================================
-   Scroll Reveal (Framer-like animation)
-   ================================================= */
-
-/* 기본 상태: 안 보이게 */
-.reveal{
-  opacity: 0;
-  transform: translateY(20px);
-  filter: blur(2px);
-  transition:
-    opacity 700ms ease,
-    transform 700ms cubic-bezier(.2,.8,.2,1),
-    filter 700ms ease;
-  will-change: opacity, transform, filter;
-}
-
-/* 보이는 상태 */
-.reveal.is-visible{
-  opacity: 1;
-  transform: translateY(0);
-  filter: blur(0);
-}
-
-/* 살짝 더 부드러운 버전 */
-.reveal--soft{
-  transform: translateY(14px);
-}
-
-/* 모션 최소화 환경 대응 */
-@media (prefers-reduced-motion: reduce){
-  .reveal, .reveal.is-visible{
-    transition: none !important;
-    transform: none !important;
-    opacity: 1 !important;
-    filter: none !important;
+    max-width: 900px;
   }
 }
